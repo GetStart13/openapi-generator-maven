@@ -1,0 +1,1 @@
+java -Dloader.path=gen -jar openapi-application-starter\target\openapi-application-starter-1.0-spring-boot.jar

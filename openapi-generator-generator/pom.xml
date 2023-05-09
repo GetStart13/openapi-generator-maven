@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>openapi-generator-maven</artifactId>
+        <groupId>com.openapi.generator</groupId>
+        <relativePath>../pom.xml</relativePath>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>openapi-generator-generator</artifactId>
+
+    <properties>
+        <!-- openapi 文档文件名 -->
+        <robot.inputSpec.filename>robotRemoteApi.yml</robot.inputSpec.filename>
+        <!-- api 文档的全局标签名，生成的类的前缀不是根据此名称，是根据每一个 api(path) 的 tags -->
+        <robot.tags.name>${tags.name}</robot.tags.name>
+        <!-- openapi 文档路径，具体到文件 -->
+        <robot.inputSpec>${project.parent.basedir}/resources/${robot.inputSpec.filename}</robot.inputSpec>
+        <!-- 生成文件的包名 -->
+        <robot.packageName>${project.groupId}.robotms.server.api</robot.packageName>
+        <!-- 生成的文件需要有自己属性的包：client 和 server，同时在判断 bean 时以此作为条件 -->
+        <!-- 客户端 api 软件包 -->
+        <robot.client.apiPackage>${robot.packageName}.${robot.tags.name}.client</robot.client.apiPackage>
+        <!-- 服务端 api 软件包 -->
+        <robot.server.apiPackage>${robot.packageName}.${robot.tags.name}.server</robot.server.apiPackage>
+        <!-- 模型软件包/实体包 -->
+        <robot.modelPackage>${robot.packageName}.${robot.tags.name}.model</robot.modelPackage>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
+        <!-- 根据 openApi 规范文档生成 java 服务端代码 -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+        <!-- end =========== openApi ========== -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <!-- loadbalancer 包必须引入，因为 openfeign 底层集成了 ribbon  -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+        <!-- auth 需要的依赖 -->
+        <dependency>
+            <groupId>com.github.scribejava</groupId>
+            <artifactId>scribejava-core</artifactId>
+            <version>8.3.3</version>
+        </dependency>
+        <!-- feign-jackson -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-jackson</artifactId>
+            <version>12.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.github.openfeign/feign-okhttp -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+            <version>12.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305 -->
+        <!-- 注解 @javax.annotation.Nullable -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.14.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-annotations -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.6</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!-- 从 yaml 中读取值，会有代码注入风险 -->
+                <!--
+                读取文件编码与系统编码不一致时会报错、读取不到文件时会报错：
+                 Failed to execute goal it.ozimov:yaml-properties-maven-plugin:1.1.3:read-project-properties (default) on project robotms-api-generator-sdk: Execution default of goal it.ozimov:yaml-properties-maven-plugin:1.1.3:read-project-properties failed: java.nio.charset.MalformedInputException: Input length = 1 -> [Help 1]
+                 -->
+                <groupId>it.ozimov</groupId>
+                <artifactId>yaml-properties-maven-plugin</artifactId>
+                <version>1.1.3</version>
+
+                <!-- 从外部 properties 读取值，虽然可能报红，但确实可以拿到值 -->
+                <!--<groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.1.0</version>-->
+
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <!--<file>${project.parent.basedir}/resources/config.properties</file>-->
+                                <file>${robot.inputSpec}</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>6.2.1</version>
+                <!-- 通过 execution 执行多次的方式，生成代码 -->
+                <executions>
+                    <execution>
+                        <!-- 唯一 id -->
+                        <id>client</id>
+                        <goals>
+                            <!-- 目标 -->
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- yml 文件名尽量避免特殊字符 -->
+                            <inputSpec>${robot.inputSpec}</inputSpec>
+
+                            <generatorName>spring</generatorName>
+                            <!-- 指定生成模板库 -->
+                            <library>spring-cloud</library>
+
+                            <!-- configHelp 显示生成器的所有参数和解释，为 true 时将不生成类源文件 -->
+                            <configHelp>false</configHelp>
+
+                            <packageName>${robot.packageName}</packageName>
+                            <apiPackage>${robot.client.apiPackage}</apiPackage>
+                            <modelPackage>${robot.modelPackage}</modelPackage>
+
+                            <!-- 生成项目的组名、工件名和版本 -->
+                            <artifactId>${project.artifactId}</artifactId>
+
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+
+                            <configOptions>
+                                <!-- 指定日期库，不生成 CustomInstantDeserializer.java 文件 -->
+                                <dateLibrary>java8-localdatetime</dateLibrary>
+
+                                <!-- 只生成接口 -->
+                                <interfaceOnly>false</interfaceOnly>
+
+                                <generatePom>false</generatePom>
+                                <!-- 是否序列化模型 -->
+                                <serializableModel>true</serializableModel>
+                                <!-- 是否禁止 html 转义 -->
+                                <disableHtmlEscaping>true</disableHtmlEscaping>
+                                <!-- 根据 openApi 文档的 tags 生成对应的类 -->
+                                <useTags>true</useTags>
+
+                            </configOptions>
+                        </configuration>
+                    </execution>
+
+                    <!-- server -->
+                    <execution>
+                        <id>server</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- yml 文件名尽量避免特殊字符 -->
+                            <inputSpec>${robot.inputSpec}</inputSpec>
+                            <generatorName>spring</generatorName>
+
+                            <!-- 生成 spring 时，library 指定 spring-cloud，接口生成的方法为抽象方法 -->
+                            <!-- 生成 spring 时，library 指定 spring-boot 或 spring-mvc，接口生成的方法为默认方法 -->
+                            <library>spring-boot</library>
+
+                            <!-- configHelp 显示生成器的所有参数和解释，为 true 时将不生成类源文件 -->
+                            <configHelp>false</configHelp>
+
+                            <!--  ApiUtil.java -->
+                            <generateSupportingFiles>true</generateSupportingFiles>
+
+                            <packageName>${robot.packageName}</packageName>
+                            <apiPackage>${robot.server.apiPackage}</apiPackage>
+                            <modelPackage>${robot.modelPackage}</modelPackage>
+
+                            <!-- 生成项目的组名、工件名和版本 -->
+                            <artifactId>${project.artifactId}</artifactId>
+                            <!-- 如果指定父级依赖，组名和工件版本就不需要冗余指定 -->
+                            <!--<groupId>com.cubegalaxy</groupId>-->
+                            <!--<artifactVersion>${revision}</artifactVersion>-->
+
+                            <!-- 是否生成实体 -->
+                            <generateModels>false</generateModels>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+
+                            <configOptions>
+                                <!-- 指定生成 pom 文件的父级依赖，后面生成的 pom 会覆盖前面客户端生成的 pom 文件 -->
+                                <parentGroupId>${project.parent.groupId}</parentGroupId>
+                                <parentArtifactId>${project.parent.artifactId}</parentArtifactId>
+                                <parentVersion>${project.parent.version}</parentVersion>
+
+                                <!-- 根据 openApi 文档的 tags 生成对应的类 -->
+                                <useTags>true</useTags>
+                                <!-- 不生成文档类 -->
+                                <documentationProvider>none</documentationProvider>
+
+                                <!-- 只生成接口 -->
+                                <interfaceOnly>false</interfaceOnly>
+                                <!-- false: 根据 api 前缀生成不同的接口，true: 只生成一个默认接口 DefaultApi -->
+                                <useTags>true</useTags>
+                                <!-- 是否生成 pom 文件 -->
+                                <generatePom>false</generatePom>
+                                <!-- 是否启用代理 -->
+                                <delegatePattern>false</delegatePattern>
+                                <!-- 是否跳过生成默认方法 -->
+                                <skipDefaultInterface>false</skipDefaultInterface>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

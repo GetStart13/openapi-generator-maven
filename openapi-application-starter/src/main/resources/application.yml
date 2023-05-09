@@ -1,0 +1,20 @@
+server:
+  port: 8086
+
+logging:
+  file:
+    name: ./log/log.txt # 日志记录文件
+  level:
+    root: info
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: basic # 日志级别
+        connectTimeout: 5000 # 连接响应超时
+        readTimeout: 5000 # 读取超时
+  httpclient:
+    enabled: false # 使用 httpclient 替换 feign 的默认 client
+  okhttp:
+    enabled: true # 使用 okhttp 替换 feign 默认 client

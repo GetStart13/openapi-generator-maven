@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.openapi.generator</groupId>
+    <artifactId>openapi-generator-maven</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+    <modules>
+        <module>openapi-application-starter</module>
+        <module>openapi-generator-generator</module>
+    </modules>
+    <name>demo</name>
+    <description>Demo project for Spring Boot</description>
+    <properties>
+        <revision>1.0</revision>
+        <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <springboot.version>2.7.5</springboot.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- 根据 openApi 规范文档生成 java 服务端代码 -->
+
+            <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+            <!-- 2.9.2 以上版本有一个类丢失 -->
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>2.9.2</version>
+            </dependency>
+            <!-- 高版本不兼容 -->
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>2.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>jackson-databind-nullable</artifactId>
+                <version>0.2.4</version>
+            </dependency>
+            <!-- okhttp client，替换掉 openFeign 默认的 client -->
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-okhttp</artifactId>
+                <version>12.1</version>
+            </dependency>
+            <!-- ========== openfeign =========== -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>3.1.5</version>
+            </dependency>
+            <!-- loadbalancer 包必须引入，因为 openfeign 底层集成了 ribbon  -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+                <version>3.1.5</version>
+            </dependency>
+            <!-- end ============= openFeign =============== -->
+
+            <!-- 子模块 -->
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${springboot.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>6.2.1</version>
+                <goals>
+                    <goal>generate</goal>
+                </goals>
+
+                <!-- openApi 的一些配置 -->
+
+                <!--<configuration>
+                    &lt;!&ndash; 生成目标框架 &ndash;&gt;
+                    <generatorName>spring</generatorName>
+                    &lt;!&ndash; 指定生成子模板库 &ndash;&gt;
+                    <library>spring-boot</library>
+                    &lt;!&ndash; 是否显示帮助，为 true 时不生成源码 &ndash;&gt;
+                    <configHelp>false</configHelp>
+                    &lt;!&ndash; 是否跳过规范验证 &ndash;&gt;
+                    <skipValidateSpec>false</skipValidateSpec>
+                    &lt;!&ndash; 是否为 api 生成测试 &ndash;&gt;
+                    <generateApiTests>false</generateApiTests>
+                    &lt;!&ndash; 是否生成模型 &ndash;&gt;
+                    <generateModels>true</generateModels>
+                    &lt;!&ndash; 是否为模型生成测试 &ndash;&gt;
+                    <generateModelTests>false</generateModelTests>
+                    &lt;!&ndash; 是否生成模型文档 &ndash;&gt;
+                    <generateModelDocumentation>false</generateModelDocumentation>
+                    &lt;!&ndash; 是否生成支持文件，ApiUtil.java &ndash;&gt;
+                    <generateSupportingFiles>true</generateSupportingFiles>
+                    &lt;!&ndash; 是否在模型中支持 xml 语法 &ndash;&gt;
+                    <withXml>false</withXml>
+                    &lt;!&ndash; 是否生成 api 接口 &ndash;&gt;
+                    <generateApis>true</generateApis>
+                    &lt;!&ndash;<generatorName>java</generatorName>&ndash;&gt;
+                    <configOptions>
+                        &lt;!&ndash; 父级模块 &ndash;&gt;
+                        <parentGroupId>${project.parent.groupId}</parentGroupId>
+                        <parentArtifactId>${project.parent.artifactId}</parentArtifactId>
+                        <parentVersion>${project.parent.version}</parentVersion>
+                        &lt;!&ndash; 参数排序 &ndash;&gt;
+                        <sortParamsByRequiredFlag>false</sortParamsByRequiredFlag>
+                        &lt;!&ndash; 是否适配 java8 &ndash;&gt;
+                        <java8>true</java8>
+                        &lt;!&ndash; 只生成接口 &ndash;&gt;
+                        <interfaceOnly>false</interfaceOnly>
+                        &lt;!&ndash; 源文件夹 &ndash;&gt;
+                        <sourceFolder>src/main/java</sourceFolder>
+                        &lt;!&ndash; 是否使用 swagger 注解 &ndash;&gt;
+                        <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                        &lt;!&ndash; 是否验证 bean &ndash;&gt;
+                        <useBeanValidation>false</useBeanValidation>
+                        &lt;!&ndash; 日期库 &ndash;&gt;
+                        <dateLibrary>java8-localdatetime</dateLibrary>
+                        &lt;!&ndash; 是否生成 pom 文件 &ndash;&gt;
+                        <generatePom>false</generatePom>
+                        &lt;!&ndash; 是否禁止 html 转义 &ndash;&gt;
+                        <disableHtmlEscaping>true</disableHtmlEscaping>
+                        &lt;!&ndash; 返回响应结果 &ndash;&gt;
+                        <returnResponse>true</returnResponse>
+                        &lt;!&ndash;  &ndash;&gt;
+                        <openApiSpecFileLocation>
+                            ${project.build.directory}/generated-sources/openapi/src/main/resources/META-INF
+                        </openApiSpecFileLocation>
+                        &lt;!&ndash;
+                        生成器根据 openApi 文档的每一个 api(path) 的 tags 名字，生成以该名字为前缀的类，
+                        忽略所有非字母和数字字符，openApi 文档的 api(path) 的 tags 属性如果不设置
+                        或者生成器里没有开启 <useTags>，则会生成 defaultApiXxx 的类
+                        &ndash;&gt;
+                        <useTags>true</useTags>
+                        &lt;!&ndash; 是否启用代理 &ndash;&gt;
+                        <delegatePattern>false</delegatePattern>
+                        &lt;!&ndash; 配置类所在包 &ndash;&gt;
+                        &lt;!&ndash;<configPackage>com.package</configPackage>&ndash;&gt;
+                        &lt;!&ndash; model 上加注解，使用全限定名 &ndash;&gt;
+                        &lt;!&ndash;<additionalModelTypeAnnotations>@org.springframework.web.bind.annotation.RestController</additionalModelTypeAnnotations>&ndash;&gt;
+                        &lt;!&ndash; 是否跳过生成默认方法 &ndash;&gt;
+                        <skipDefaultInterface>false</skipDefaultInterface>
+                        &lt;!&ndash; 是否序列化模型 &ndash;&gt;
+                        <serializableModel>true</serializableModel>
+                    </configOptions>
+                </configuration>-->
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

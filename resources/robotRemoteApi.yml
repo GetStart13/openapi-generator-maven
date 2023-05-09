@@ -1,0 +1,592 @@
+openapi: 3.0.0
+x-stoplight:
+  id: nv9buqbrg9h8q
+info:
+  title: localApi
+  version: '1.0'
+  description: 一个api项目
+  license:
+    name: nolicence
+    url: 'http://127.0.0.1'
+  contact:
+    name: melong D
+    email: 2018067892@qq.com
+    url: 'http://127.0.0.1'
+servers:
+  - url: 'http://localhost:9999'
+    description: melong D
+paths:
+  /api/v1/system/status:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sysStatus'
+        '404':
+          description: Not Found
+      operationId: get-system-status
+      description: 获取机器人状态
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/token:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/token'
+      operationId: get-token
+      description: 获取 token
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: username
+          description: 用户名
+        - schema:
+            type: string
+          in: query
+          name: password
+          description: 密码
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/system/info:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sysInfo'
+      operationId: get-system-info
+      description: 获取系统基本信息
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/system/galileo_status:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/galileoStatus'
+      operationId: get-system-galileo_status
+      tags:
+        - robotVOne
+      description: 获取导航系统状态
+    parameters: []
+  /api/v1/system/speed:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/speed'
+      operationId: get-system-speed
+      description: 获取机器人速度
+      tags:
+        - robotVOne
+    put:
+      summary: ''
+      operationId: put-system-speed
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      description: 遥控机器人，x、y 单位 m，转角 1 为 180 度。
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/speed'
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/system/shutdown:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      operationId: get-system-shutdown
+      description: 关闭机器人
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/system/config:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/config'
+      operationId: get-system-config
+      description: 获取机器人当前配置信息
+      tags:
+        - robotVOne
+    delete:
+      summary: ''
+      operationId: delete-system-config
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      description: 恢复机器人默认参数
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: key
+          description: '对应参数的名称,如 k2,kp,ki 等等'
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/system/tts:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      operationId: get-system-tts
+      description: 让机器人播报语音
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: text
+          description: 语音内容
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/map/start:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      operationId: get-map-start
+      description: 启动创建地图
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/map/stop:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      operationId: get-map-stop
+      description: 结束创建地图线程
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/map/pose:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pose'
+      operationId: get-map-pose
+      description: 获取机器人位置信息
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/map/current_map_image:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mapMsg'
+      operationId: get-map-current_map_image
+      description: 获取当前正在创建地图的信息
+      tags:
+        - robotVOne
+    post:
+      summary: ''
+      operationId: post-map-current_map_image
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/result'
+      description: 保存地图，+名字
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/robotMap'
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/map/current_map_png:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+      operationId: get-map-current_map_png
+      description: 获取当前正在创建地图的png
+      tags:
+        - robotVOne
+    parameters: []
+  /api/v1/map/track:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/track'
+      operationId: get-map-track
+      description: 机器人运动轨迹
+      tags:
+        - robotVOne
+    parameters: []
+components:
+  schemas:
+    sysStatus:
+      title: sysStatus
+      x-stoplight:
+        id: g9ws5heeby3k0
+      type: object
+      properties:
+        status:
+          type: string
+      description: 系统状态
+    token:
+      title: token
+      x-stoplight:
+        id: hqe90fl851kfc
+      type: object
+      properties:
+        result:
+          type: string
+        token:
+          type: string
+      description: token
+    sysInfo:
+      title: sysInfo
+      x-stoplight:
+        id: h01kqs3ax99to
+      type: object
+      properties:
+        battery:
+          type: integer
+        camera_rgb:
+          type: integer
+        camera_depth:
+          type: integer
+        odom:
+          type: integer
+        imu:
+          type: integer
+        camera_processed:
+          type: integer
+        driver_port:
+          type: boolean
+        info:
+          $ref: '#/components/schemas/info'
+        charge:
+          type: boolean
+        loop:
+          type: boolean
+        slam_type:
+          type: string
+        cpu:
+          type: number
+        memory:
+          type: number
+      description: 系统基本信息
+    info:
+      title: info
+      x-stoplight:
+        id: gz1cfeu8ko183
+      type: object
+      properties:
+        version:
+          type: string
+        code_name:
+          type: string
+        id:
+          type: string
+        mac:
+          type: string
+        port:
+          type: integer
+      description: 信息
+    header:
+      title: header
+      x-stoplight:
+        id: 9q933sr89438l
+      type: object
+      properties:
+        seq:
+          type: string
+        stamp:
+          $ref: '#/components/schemas/stamp'
+        frame_id:
+          type: string
+      description: ''
+    stamp:
+      title: stamp
+      x-stoplight:
+        id: sxt90id6whnes
+      type: object
+      properties:
+        secs:
+          type: integer
+        nsecs:
+          type: integer
+    galileoStatus:
+      title: galileoStatus
+      x-stoplight:
+        id: kpm99ytu4yzmn
+      type: object
+      description: 系统导航状态
+      properties:
+        header:
+          $ref: '#/components/schemas/header'
+        navStatus:
+          type: integer
+        visualStatus:
+          type: integer
+        mapStatus:
+          type: integer
+        gcStatus:
+          type: integer
+        gbaStatus:
+          type: integer
+        chargeStatus:
+          type: integer
+        loopStatus:
+          type: integer
+        power:
+          type: number
+        targetNumID:
+          type: number
+        targetStatus:
+          type: integer
+        targetDistance:
+          type: number
+        angleGoalStatus:
+          type: number
+        controlSpeedX:
+          type: number
+        controlSpeedTheta:
+          type: number
+        currentSpeedX:
+          type: number
+        currentSpeedTheta:
+          type: number
+        currentPosX:
+          type: number
+        currentPosY:
+          type: number
+        currentAngle:
+          type: number
+        busyStatus:
+          type: integer
+    speed:
+      title: speed
+      x-stoplight:
+        id: 5b124fdj6zlas
+      type: object
+      properties:
+        speed_x:
+          type: number
+        speed_y:
+          type: number
+        speed_angle:
+          type: number
+      description: 机器人速度
+    result:
+      title: result
+      x-stoplight:
+        id: 620c6yw6o0qb5
+      type: object
+      description: 返回结果
+      properties:
+        result:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+    config:
+      title: config
+      x-stoplight:
+        id: g55ss2wyxq3qt
+      type: object
+      description: 机器人配置信息
+      properties:
+        default_map:
+          type: string
+        maps:
+          type: object
+        navigation_speed:
+          type: string
+        max_control_speed:
+          type: string
+        max_control_angle_speed:
+          type: string
+        k2:
+          type: string
+        kp:
+          type: string
+        ki:
+          type: string
+        kd:
+          type: string
+        theta_max:
+          type: string
+        plan_width:
+          type: string
+        path_change:
+          type: string
+        forward_width:
+          type: string
+        rot_width:
+          type: string
+        backtime:
+          type: string
+        bar_distance_min:
+          type: string
+        auto_charge:
+          type: boolean
+        slam_type:
+          type: string
+        volume:
+          type: number
+        audio_package:
+          type: string
+        version:
+          type: string
+        use_smooth_switch_map:
+          type: boolean
+        robot_radius:
+          type: string
+    robotMap:
+      title: map
+      x-stoplight:
+        id: e051bd263f0f4
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        start_index:
+          type: string
+      description: 机器人地图
+    pose:
+      title: pose
+      x-stoplight:
+        id: mdz35sx3etul3
+      type: object
+      properties:
+        x:
+          type: number
+        'y':
+          type: number
+        angle:
+          type: number
+      description: 机器人位置
+    mapMsg:
+      title: mapMsg
+      x-stoplight:
+        id: aj0q6psd5xdh2
+      type: object
+      description: 地图信息
+      properties:
+        status:
+          type: string
+        map_params:
+          type: object
+        map_image:
+          type: string
+    coordinates:
+      title: coordinates
+      x-stoplight:
+        id: zj5exkz4ah9sb
+      type: object
+      properties:
+        x:
+          type: number
+        'y':
+          type: number
+        z:
+          type: number
+      description: 坐标
+    track:
+      title: track
+      x-stoplight:
+        id: hskcj3wkswj0e
+      type: object
+      properties:
+        trajectory:
+          type: array
+          items:
+            $ref: '#/components/schemas/coordinates'
+      description: 机器人的运动轨迹
+tags:
+  - name: robot._$中-3VTwo
+    description: 机器人类型一
